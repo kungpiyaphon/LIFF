@@ -12,20 +12,27 @@
   
   <script>
     async function main() {
-      await liff.init({ liffId: "2006574991-MB9mJ34n" });
-      if (!liff.isLoggedIn()) {
-        liff.login();
-      }
+  try {
+    await liff.init({ liffId: "2006574991-MB9mJ34n" });
+    console.log("LIFF initialized");
+    if (!liff.isLoggedIn()) {
+      liff.login();
     }
-
+  } catch (error) {
+    console.error("LIFF initialization failed:", error);
+  }
+}
+    
     async function getLocation() {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(async (position) => {
+          console.log("Position obtained:", position);
           const latitude = position.coords.latitude;
           const longitude = position.coords.longitude;
           
           // ดึง userId จาก LIFF profile
           const profile = await liff.getProfile();
+          console.log("User profile:", profile);
           const userId = profile.userId;
 
           // ส่งข้อมูลไปยัง Apps Script
@@ -43,11 +50,14 @@
           });
 
           const result = await response.json();
+          console.log("Response from server:", result);
           alert(result.status === 'success' ? 'Check in สำเร็จ!' : 'เกิดข้อผิดพลาด');
         }, (error) => {
+          console.error("Geolocation error:", error);
           alert('ไม่สามารถเข้าถึงตำแหน่งได้');
         });
       } else {
+         console.error("Geolocation not supported");
         alert('อุปกรณ์ของคุณไม่รองรับการเข้าถึงตำแหน่ง');
       }
     }
