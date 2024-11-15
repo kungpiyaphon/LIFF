@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Check In App</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+<body>
+  <h1>Check In</h1>
+  <button id="checkInBtn">Check In</button>
+  
+  <script>
+    async function main() {
+      await liff.init({ liffId: "YOUR_LIFF_ID" });
+      if (!liff.isLoggedIn()) {
+        liff.login();
+      }
+    }
+
+    async function getLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async (position) => {
+          const latitude = position.coords.latitude;
+          const longitude = position.coords.longitude;
+          
+          // ดึง userId จาก LIFF profile
+          const profile = await liff.getProfile();
+          const userId = profile.userId;
+
+          // ส่งข้อมูลไปยัง Apps Script
+          const response = await fetch('YOUR_APPS_SCRIPT_WEB_APP_URL', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              userId: userId,
+              latitude: latitude,
+              longitude: longitude,
+              type: 'Check in', // หรือ 'Check out'
+            }),
+          });
+
+          const result = await response.json();
+          alert(result.status === 'success' ? 'Check in สำเร็จ!' : 'เกิดข้อผิดพลาด');
+        }, (error) => {
+          alert('ไม่สามารถเข้าถึงตำแหน่งได้');
+        });
+      } else {
+        alert('อุปกรณ์ของคุณไม่รองรับการเข้าถึงตำแหน่ง');
+      }
+    }
+
+    document.getElementById('checkInBtn').addEventListener('click', getLocation);
+    main();
+  </script>
+</body>
+</html>
